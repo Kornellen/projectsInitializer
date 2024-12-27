@@ -1,19 +1,23 @@
-import { exec } from "child_process";
+import { execSync } from "child_process";
 
 export async function npmPackageInstaller(
   saveDev: boolean,
   packageLists: string[]
 ) {
+  console.log(packageLists.join(" "));
   const command = `npm install ${packageLists.join(" ")} ${
     saveDev ? "--save-dev" : ""
   }`;
 
-  exec(command, (error, stderr) => {
-    if (error) {
-      console.error("Error: " + error);
-      return;
-    }
-  });
+  console.log(command);
+
+  execSync(command);
 }
 
-export async function pipPackageInstaller() {}
+export async function pipPackageInstaller(packageLists: string[]) {
+  const command = `venv\\Scripts\\activate && pip install ${packageLists.join(
+    " "
+  )}`;
+
+  execSync(command);
+}

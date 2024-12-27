@@ -1,17 +1,15 @@
 import inquirer from "inquirer";
 import { languageType } from "../types/types";
-import { npmPackageInstaller } from "./packageInstallers";
-import { execSync } from "child_process";
-import projectDetails from "./projectDetails";
+import { npmPackageInstaller, pipPackageInstaller } from "./packageInstallers";
 
 export default async function additionalLibraries(language: languageType) {
-  const { projectPath } = await projectDetails(language);
   const { additionalLibraries } = await inquirer.prompt({
     type: "input",
     name: "additionalLibraries",
     message: "Type Additional Libraries to install",
   });
   if (language === "Python") {
+    pipPackageInstaller(additionalLibraries.split(" "));
   } else if (language === "JavaScript" || language === "TypeScript") {
     const { saveDev } = await inquirer.prompt({
       type: "confirm",
@@ -20,7 +18,6 @@ export default async function additionalLibraries(language: languageType) {
       default: false,
     });
     npmPackageInstaller(saveDev, additionalLibraries.split(" "));
-  } else if (language === "C++") {
   } else {
     return;
   }

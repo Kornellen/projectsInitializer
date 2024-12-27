@@ -1,10 +1,12 @@
 import { createFile } from "../../../helpers/createDirsFiles";
 
 export default async function PlainWithHTMl() {
-  const files = ["index.html", "style.css", "app.js"];
-  console.log("Hi");
-
+  const files = [
+    { file: "index.html", content: `<script src="./app.js"></script>` },
+    { file: "style.css", content: "/*CSS Stylesheet*/" },
+    { file: "app.js", content: "// JavaScript code" },
+  ];
   files.forEach((file) => {
-    createFile(file);
+    createFile(file.file, file.content);
   });
 }

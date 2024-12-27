@@ -1,27 +1,28 @@
 import { execSync } from "child_process";
-import { projectDetails } from "../../../helpers";
 
 export default async function checkFramework(
-  framework: "React + Vite" | "Next.js"
+  framework: "React + Vite" | "Next.js",
+  projectDetails: { projectPath: string; projectName: string },
+  language: "JavaScript" | "TypeScript"
 ) {
-  const details = await projectDetails("JavaScript");
-
   switch (framework) {
     case "Next.js":
-      execSync(
-        `npx create-next-app@latest ${details.projectPath} --js --tailwind --eslint --use-npm --src-dir --no-turbopack --app`,
-        {
-          stdio: "inherit",
-        }
-      );
+      const commandNext =
+        language === "JavaScript"
+          ? `npx create-next-app@latest ${projectDetails.projectName} --js --tailwind --eslint --use-npm --src-dir --no-turbopack --app`
+          : `npx create-next-app@latest ${projectDetails.projectName} --ts --tailwind --eslint --use-npm --src-dir --no-turbopack --app`;
+      execSync(commandNext, {
+        stdio: "inherit",
+      });
       break;
     case "React + Vite":
-      execSync(
-        `npm create vite@latest ${details.projectPath} -- --template react`,
-        {
-          stdio: "inherit",
-        }
-      );
+      const commandVite =
+        language === "JavaScript"
+          ? `npm create vite@latest ${projectDetails.projectName}\\. -- --template react`
+          : `npm create vite@latest ${projectDetails.projectName}\\. -- --template react-ts`;
+      execSync(commandVite, {
+        stdio: "inherit",
+      });
       break;
   }
 }

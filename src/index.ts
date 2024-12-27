@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 import inquirer from "inquirer";
-import { checkLanguage } from "./helpers";
-import { execSync } from "child_process";
+import checkLanguage from "./helpers/checkLanguage";
 
 async function app() {
   let projectType: "Plain" | "Framework";
@@ -12,15 +11,24 @@ async function app() {
     message: "Choose Language for Project",
     choices: ["Python", "TypeScript", "JavaScript", "C++", "PowerShell", "SQL"],
   });
+  let answeredType;
 
-  const answeredType = await inquirer.prompt({
-    type: "list",
-    name: "projectType",
-    message: "Choose Project Type",
-    choices: ["Plain", "Framework"],
-  });
+  if (
+    language !== "SQL" &&
+    language !== "PowerShell" &&
+    language !== "C++" &&
+    language !== "Python"
+  ) {
+    answeredType = await inquirer.prompt({
+      type: "list",
+      name: "projectType",
+      message: "Choose Project Type",
+      choices: ["Plain", "Framework"],
+    });
+  }
 
-  projectType = answeredType.projectType;
+  projectType = answeredType?.projectType || "Plain";
+  console.log(`Project Type: ${projectType}`);
 
   checkLanguage(language, projectType);
 }

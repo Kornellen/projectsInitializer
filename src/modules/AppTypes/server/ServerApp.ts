@@ -4,13 +4,24 @@ import { npmPackageInstaller } from "../../../helpers/packageInstallers";
 import additionalLibraries from "../../../helpers/additionalLibraries";
 import { createDir } from "../../../helpers/createDirsFiles";
 
-export default async function ServerApp() {
+export default async function ServerApp(language: "JavaScript" | "TypeScript") {
   execSync("npm init -y");
+
   const { isHTTPS } = await inquirer.prompt({
     type: "confirm",
     name: "isHTTPS",
     message: "Is Backend APP use HTTPS Protocol?",
   });
+
+  const typeScriptPack = [
+    "typescript",
+    "ts-node",
+    "tsc",
+    "@types/node",
+    "@types/express",
+    "@types/cors",
+    "@types/express-validator",
+  ];
 
   const dirs = [
     "src",
@@ -30,14 +41,24 @@ export default async function ServerApp() {
     "http",
   ];
 
+  if (language === "TypeScript") {
+    try {
+      npmPackageInstaller(true, typeScriptPack);
+
+      execSync("tsc --init");
+    } catch (error) {}
+  }
+
   npmPackageInstaller(false, defautlLib);
 
   const { isAdditionalLibraries } = await inquirer.prompt({
     type: "confirm",
     name: "isAdditionalLibraries",
-    message: `Is Backend App use other libraries? (Currently installed: ${defautlLib.join(
-      ", "
-    )})`,
+    message: `Is Backend App use other libraries? (Currently installed: ${
+      language === "TypeScript"
+        ? defautlLib.concat(typeScriptPack).join(", ")
+        : defautlLib.join(", ")
+    })`,
   });
 
   if (isAdditionalLibraries) {

@@ -5,6 +5,7 @@ import ServerApp from "../AppTypes/server/ServerApp";
 import PlainWithHTMl from "../AppTypes/client/PlainWithHTML";
 import { appType } from "../../types/types";
 import checkFramework from "../AppTypes/client/FrontendApp";
+import projectSummary from "../../helpers/creatingSummary";
 
 export default async function JavaScript(
   projectType: "Plain" | "Framework",
@@ -12,7 +13,6 @@ export default async function JavaScript(
 ) {
   execSync(`mkdir ${projectInfos.projectPath}`);
   process.chdir(projectInfos.projectPath);
-
   if (projectType === "Framework") {
     const { app }: { app: appType } = await inquirer.prompt({
       type: "list",
@@ -29,10 +29,10 @@ export default async function JavaScript(
           message: "Choose Framework for Frontend",
           choices: ["React + Vite", "Next.js"],
         });
-        checkFramework(javaScriptFramework);
+        checkFramework(javaScriptFramework, projectInfos, "JavaScript");
         break;
       case "Backend":
-        ServerApp();
+        ServerApp("JavaScript");
         break;
     }
   } else {
@@ -45,12 +45,12 @@ export default async function JavaScript(
 
     switch (app) {
       case "Console app":
-        ConsoleApp();
+        ConsoleApp("JavaScript");
         break;
       case "Plain with HTML":
         PlainWithHTMl();
-
         break;
     }
   }
+  projectSummary(projectInfos, projectType);
 }

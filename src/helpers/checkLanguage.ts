@@ -21,6 +21,7 @@ export default async function checkLanguage(
       Pwsh(projectType, projectInfos);
       break;
     case "Python":
+      projectType = "Plain";
       Python(projectType, projectInfos);
       break;
     case "SQL":
