@@ -1,38 +1,38 @@
-import { exec, execSync } from "child_process";
-import fs from "fs";
+import { execSync } from "child_process";
 import inquirer from "inquirer";
 import additionalLibraries from "../../../helpers/additionalLibraries";
 import { npmPackageInstaller } from "../../../helpers/packageInstallers";
+import { createDir } from "../../../helpers/createDirsFiles";
+import ErrorHandler from "../../../helpers/ErrorHandler";
 
 export default async function ConsoleApp(
   language: "JavaScript" | "TypeScript"
 ) {
-  execSync("npm init -y");
+  try {
+    console.log("Initialization of Console App...".blue);
+    execSync("npm init -y");
 
-  if (language === "TypeScript") {
-    try {
+    if (language === "TypeScript") {
       npmPackageInstaller(true, ["typescript", "ts-node", "@types/node"]);
 
       execSync("npx tsc --init", { stdio: "inherit" });
-    } catch (error) {
-      execSync(`rmdir ${process.cwd()}`);
-      throw new Error("There was an error installing the required packages.");
     }
-  }
 
-  const { isAdditionalLibraries } = await inquirer.prompt({
-    type: "confirm",
-    name: "isAdditionalLibraries",
-    message: "Is your app use additional libraries?",
-  });
+    const { isAdditionalLibraries } = await inquirer.prompt({
+      type: "confirm",
+      name: "isAdditionalLibraries",
+      message: "Is your app use additional libraries?",
+    });
 
-  if (isAdditionalLibraries) {
-    additionalLibraries(language);
-  }
-
-  fs.mkdir("./src", { recursive: true }, (err) => {
-    if (err) {
-      console.error(`Error creating - src/ - dir: ` + err);
+    if (isAdditionalLibraries) {
+      additionalLibraries(language);
     }
-  });
+
+    createDir("./src");
+  } catch (error) {
+    new ErrorHandler(
+      error,
+      "There was an error creating the console app."
+    ).handleError();
+  }
 }

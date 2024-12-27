@@ -1,9 +1,9 @@
 {
   "name": "projectsinitializer",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.1.0",
+  "main": "dist/index.js",
   "bin": {
-    "project-starter": "dist/index.js"
+    "projectsinitializer": "dist/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,6 +19,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "inquirer": "^12.3.0"
   },
   "description": ""

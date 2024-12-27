@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
 import { languageType } from "../types/types";
+import path from "path";
 
 export default async function projectDetails(
   language: languageType
@@ -22,5 +23,15 @@ export default async function projectDetails(
     default: `.\\${projectName}`,
   });
 
-  return { projectName, projectPath: projectPath.replace("/", "\\") };
+  let finalPath = projectPath;
+  if (!projectPath.includes(projectName)) {
+    finalPath = path.isAbsolute(projectPath)
+      ? projectPath + "\\" + projectName
+      : projectPath + "\\" + projectName;
+  }
+
+  return {
+    projectName,
+    projectPath: finalPath.replace("/", "\\"),
+  };
 }

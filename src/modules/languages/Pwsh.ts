@@ -1,18 +1,24 @@
-import { createFile } from "../../helpers/createDirsFiles";
-import fs from "fs";
+import { createDir, createFile } from "../../helpers/createDirsFiles";
 import projectSummary from "../../helpers/creatingSummary";
+import ErrorHandler from "../../helpers/ErrorHandler";
 
-export default function Pwsh(
+export default async function Pwsh(
   projectType: "Plain",
   projectInfos: { projectName: string; projectPath: string }
 ) {
-  if (!fs.existsSync(projectInfos.projectPath)) {
-    fs.mkdirSync(projectInfos.projectPath, { recursive: true });
-  }
+  try {
+    console.log(`Initialization of PowerShell project...`.blue);
+    projectInfos.projectPath = createDir(projectInfos.projectPath);
 
-  createFile(
-    `${projectInfos.projectPath}/script.ps1`,
-    "# PowerShell script code goes here"
-  );
-  projectSummary(projectInfos, projectType);
+    createFile(
+      `${projectInfos.projectPath}/script.ps1`,
+      "# PowerShell script code goes here"
+    );
+    await projectSummary(projectInfos, projectType);
+  } catch (error) {
+    new ErrorHandler(
+      error,
+      `There was an error creating the PowerShell project`
+    ).handleError();
+  }
 }

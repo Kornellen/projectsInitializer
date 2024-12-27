@@ -1,19 +1,23 @@
-import { createFile } from "../../helpers/createDirsFiles";
-import fs from "fs";
+import { createDir, createFile } from "../../helpers/createDirsFiles";
 import projectSummary from "../../helpers/creatingSummary";
+import ErrorHandler from "../../helpers/ErrorHandler";
 
-export default function SQL(
+export default async function SQL(
   projectType: "Plain",
   projectInfos: { projectName: string; projectPath: string }
 ) {
-  if (!fs.existsSync(projectInfos.projectPath)) {
-    fs.mkdirSync(projectInfos.projectPath, { recursive: true });
+  try {
+    console.log(`Initialization of SQL project...`.blue);
+    projectInfos.projectPath = createDir(projectInfos.projectPath);
+    process.chdir(projectInfos.projectPath);
+
+    createFile(`database.db`, "-- SQL code goes here");
+
+    await projectSummary(projectInfos, projectType);
+  } catch (error) {
+    new ErrorHandler(
+      error,
+      `There was an error creating the PowerShell project`
+    ).handleError();
   }
-
-  createFile(
-    `${projectInfos.projectPath}/database.db`,
-    "-- SQL code goes here"
-  );
-
-  projectSummary(projectInfos, projectType);
 }

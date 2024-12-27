@@ -2,6 +2,12 @@
 
 import inquirer from "inquirer";
 import checkLanguage from "./helpers/checkLanguage";
+import colors from "colors";
+import ErrorHandler from "./helpers/ErrorHandler";
+
+colors.enable();
+
+ErrorHandler.handleSIGNINT();
 
 async function app() {
   let projectType: "Plain" | "Framework";
