@@ -4,16 +4,23 @@
 
 This project is a simple, multi-language CLI project management tool that allows users to quickly initialize new projects. Inspired by Vite, this tool supports various programming languages and frameworks, providing a streamlined way to kickstart development.
 
-## Project Structure
+# Requirements
+
+- node.js >= 20.0.0
+- npm >= 8.0.0
+
+## For Developers
+
+### Project Structure
 
 ### **Root Directory**
 
-- .gitignore: Contains files and directories that should be ignored by Git
-- README.md: Project Overview and Usage Instructions
+- `.gitignore`: Contains files and directories that should be ignored by Git
+- `README.md`: Project Overview and Usage Instructions
 
-- package.json: Project dependencies and scripts
+- `package.json`: Project dependencies and scripts
 
-- tsconfig.json: TypeScript compiler options for this project
+- `tsconfig.json`: TypeScript compiler options for this project
 
 ### `src/` Directory
 
@@ -110,22 +117,46 @@ Contains all the types used in the application
     npx projectsinitializer
 ```
 
+## For Release Users
+
+### Installation
+
+1. Install the CLI tool globally:
+
+```bash
+    npm install -g github:Kornellen/projectsInitializer
+```
+
+2. Run the CLI tool:
+
+```bash
+    npx projectsinitializer
+```
+
+Or
+
+```bash
+    projectsinitializer
+```
+
 ## Example Usage
+
+### For Developers
 
 ### Usage without linking
 
-Just use following command in main folder of project:
+Just use following command in the main folder of project:
 
 ```bash
-    npm run dev
+    npm run dev # For running the application in development mode
 ```
 
 ### Usage with linking
 
-At start you need run following command in main folder of project:
+At start you need to compile the application with following command:
 
 ```bash
-    npm run build
+    npm run build # For compiling TypeScript application
 ```
 
 After this run:
@@ -140,6 +171,8 @@ After linking the application, you can use the CLI tool to initialize a new proj
     npx projectsinitializer
 ```
 
+### For All Users
+
 This will prompt you to select programming language
 
 ```bash
@@ -152,7 +185,7 @@ This will prompt you to select programming language
     SQL
 ```
 
-After selecting the language like JavaScript or TypeScript it will firstly ask you to choose the project type like Plain (Console App for JavaScript and TypeScript And Vanilla JS with HTML and CSS for JavaScript) or Framework (For JavaScript and TypeScript). This question is only for TypeScript & JavaScript
+After selecting the language like JavaScript or TypeScript it will firstly ask you to choose the project type like Plain (Console App for JavaScript and TypeScript And Vanilla JS with HTML and CSS for JavaScript) or Framework (For JavaScript and TypeScript). _This question is only for TypeScript and JavaScript projects_
 
 ```bash
     ✔ Choose Language for Project TypeScript
@@ -178,7 +211,7 @@ In Python projects, you will be asked about creating a virtual environment. Defa
     ? Is your app use virual environment for packages? (Y/n)
 ```
 
-In JavaScript or TypeScript you will be asked about application type. If choosen `Plain` you can select beteewn `Console App` with Node.js and `Plain JS` with HTML and CSS - This Option is only aviable for JavaScript.
+In JavaScript or TypeScript you will be asked about application type. If chosen `Plain` you can select beteewn `Console App` with Node.js and `Plain JS` with HTML and CSS - This Option is only aviable for JavaScript.
 
 ```bash
     ✔ Choose Language for Project JavaScript
@@ -222,6 +255,7 @@ All of process like creation of `virtual environment` for `Python`, initializati
 ## Planned Features
 
 - [ ] Support for C++ language projects
+- [ ] Support for PHP language projects
 
 ## License
 
