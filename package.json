@@ -1,6 +1,6 @@
 {
   "name": "projectsinitializer",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "dist/index.js",
   "bin": {
     "projectsinitializer": "dist/index.js"
@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.2",
     "ts-node": "^10.9.2",
