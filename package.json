@@ -1,26 +1,32 @@
 {
   "name": "projectsinitializer",
-  "version": "1.1.2",
-  "main": "dist/index.js",
+  "version": "2.0.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "bin": {
     "projectsinitializer": "dist/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "tsup",
     "dev": "ts-node src/index.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kornellen",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.2",
     "ts-node": "^10.9.2",
+    "tsup": "^8.3.5",
     "typescript": "^5.7.2"
   },
   "dependencies": {
     "colors": "^1.4.0",
     "inquirer": "^12.3.0"
   },
-  "description": ""
+  "description": "",
+  "files": [
+    "dist"
+  ]
 }
