@@ -19,7 +19,7 @@ export default async function Python(
     const { isVenv } = await inquirer.prompt({
       type: "confirm",
       name: "isVenv",
-      message: "Is your app use virual environment for packages?",
+      message: "Is your app use virtual environment for packages?",
       default: true,
     });
 

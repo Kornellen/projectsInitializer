@@ -459,7 +459,7 @@ function Python(projectType, projectInfos) {
       const { isVenv } = yield import_inquirer5.default.prompt({
         type: "confirm",
         name: "isVenv",
-        message: "Is your app use virual environment for packages?",
+        message: "Is your app use virtual environment for packages?",
         default: true
       });
       if (isVenv) {
