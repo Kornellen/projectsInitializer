@@ -1,6 +1,6 @@
 {
   "name": "projectsinitializer",
-  "version": "1.1.1",
+  "version": "2.1.0",
   "main": "dist/index.js",
   "bin": {
     "projectsinitializer": "dist/index.js"
@@ -8,19 +8,24 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node --files src/index.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "cli",
+    "automatization",
+    "tool"
+  ],
+  "author": "Kornellen",
+  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.17.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "colors": "^1.4.0",
-    "inquirer": "^12.3.0"
+    "inquirer": "^12.3.0",
+    "table": "^6.9.0"
   },
-  "description": ""
+  "description": "Simple CLI Tool for project initialization automatization"
 }

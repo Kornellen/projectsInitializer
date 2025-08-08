@@ -1,37 +1,37 @@
-import inquirer from "inquirer";
-import { languageType } from "../types/types";
-import path from "path";
+import { UserInterations } from "./UserInteractions";
 
-export default async function projectDetails(
-  language: languageType
-): Promise<{ projectName: string; projectPath: string }> {
-  const { projectName } = await inquirer.prompt([
-    {
-      type: "input",
-      name: "projectName",
-      message: "Type project name",
-      default: `my-${
-        language === "C++" ? "cpp" : language.toLowerCase()
-      }-project`,
-    },
-  ]);
+export class ProjectDetails {
+  public static projectDetails: projectDetailsType;
 
-  const { projectPath } = await inquirer.prompt({
-    type: "input",
-    name: "projectPath",
-    message: "Type Project Path",
-    default: `.\\${projectName}`,
-  });
+  public static async SetUpProjectDetails(language: languageType) {
+    const { projectName } = await UserInterations.prepareQuestion(
+      {
+        type: "input",
+        name: "projectName",
+        message: "Enter your project name",
+      },
+      {
+        default: `my-${
+          language === "C++" ? "cpp" : language.toLocaleLowerCase()
+        }-project`,
+      }
+    );
 
-  let finalPath = projectPath;
-  if (!projectPath.includes(projectName)) {
-    finalPath = path.isAbsolute(projectPath)
-      ? projectPath + "\\" + projectName
-      : projectPath + "\\" + projectName;
+    let { projectPath } = await UserInterations.prepareQuestion(
+      {
+        type: "input",
+        name: "projectPath",
+        message:
+          "Enter path to your new project (require full path like: C:\\Users\\your_project_name etc.)",
+      },
+      { default: `.\\${projectName}` }
+    );
+
+    if (!projectPath.includes(projectName)) projectPath += projectName;
+
+    this.projectDetails = {
+      projectName: projectName,
+      projectPath: projectPath,
+    };
   }
-
-  return {
-    projectName,
-    projectPath: finalPath.replace("/", "\\"),
-  };
 }

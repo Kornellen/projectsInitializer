@@ -1,42 +1,62 @@
 #!/usr/bin/env node
 
-import inquirer from "inquirer";
-import checkLanguage from "./helpers/checkLanguage";
+import selectLanguage from "./helpers/selectLanguage";
 import colors from "colors";
 import ErrorHandler from "./helpers/ErrorHandler";
+import { UserInterations } from "./helpers/UserInteractions";
+import { ProjectDetails } from "./helpers/ProjectDetails";
 
 colors.enable();
 
-ErrorHandler.handleSIGNINT();
+class App {
+  private static LANGUAGES_WITHOUT_FRAMEWORK_SUPPORT: string[] = [
+    "SQL",
+    "PowerShell",
+    "C++",
+    "Python",
+  ];
 
-async function app() {
-  let projectType: "Plain" | "Framework";
-  const { language } = await inquirer.prompt({
-    type: "list",
-    name: "language",
-    message: "Choose Language for Project",
-    choices: ["Python", "TypeScript", "JavaScript", "C++", "PowerShell", "SQL"],
-  });
-  let answeredType;
+  private static projectAppType: projectAppType = "Plain";
 
-  if (
-    language !== "SQL" &&
-    language !== "PowerShell" &&
-    language !== "C++" &&
-    language !== "Python"
-  ) {
-    answeredType = await inquirer.prompt({
-      type: "list",
-      name: "projectType",
-      message: "Choose Project Type",
-      choices: ["Plain", "Framework"],
-    });
+  public static async main(): Promise<void> {
+    try {
+      ErrorHandler.handleSIGNINT();
+      const { language } = await UserInterations.prepareQuestion({
+        type: "list",
+        name: "language",
+        message: "Choose Language for Project",
+        choices: [
+          "Python",
+          "TypeScript",
+          "JavaScript",
+          "C++",
+          "PowerShell",
+          "SQL",
+        ],
+      });
+
+      if (this.isSupportedLanguageFramework(language)) {
+        const { projectAppType } = await UserInterations.prepareQuestion({
+          type: "list",
+          name: "projectAppType",
+          message: "Choose Project App type",
+          choices: ["Plain", "Framework"],
+        });
+
+        this.projectAppType = projectAppType;
+      }
+
+      await ProjectDetails.SetUpProjectDetails(language);
+
+      selectLanguage(language, this.projectAppType);
+    } catch (error) {
+      throw new Error("There was an error");
+    }
   }
 
-  projectType = answeredType?.projectType || "Plain";
-  console.log(`Project Type: ${projectType}`);
-
-  checkLanguage(language, projectType);
+  private static isSupportedLanguageFramework(language: string): boolean {
+    return !this.LANGUAGES_WITHOUT_FRAMEWORK_SUPPORT.includes(language);
+  }
 }
 
-app();
+App.main();

@@ -1,55 +1,54 @@
-import inquirer from "inquirer";
-import { createDir, createFile } from "../../helpers/createDirsFiles";
 import { execSync } from "child_process";
-import additionalLibraries from "../../helpers/additionalLibraries";
-import projectSummary from "../../helpers/creatingSummary";
-import ErrorHandler from "../../helpers/ErrorHandler";
-
+import projectSummary from "../../helpers/ProjectSummary";
+import { FileHelper } from "../../helpers/FileHelper";
+import { UserInterations } from "../../helpers/UserInteractions";
+import { DependencyInstaller } from "../../helpers/DependencyInstaller";
 export default async function Python(
-  projectType: "Plain",
-  projectInfos: { projectName: string; projectPath: string }
+  projectType: projectAppType,
+  projectInfos: projectDetailsType
 ) {
   try {
-    projectInfos.projectPath = createDir(projectInfos.projectPath);
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
 
     process.chdir(projectInfos.projectPath);
 
-    createFile(`main.py`, "# Python code goes here");
+    FileHelper.createFile(`main.py`, "# Python code goes here");
 
-    const { isVenv } = await inquirer.prompt({
-      type: "confirm",
-      name: "isVenv",
-      message: "Is your app use virual environment for packages?",
-      default: true,
-    });
+    const { isVenv } = await UserInterations.prepareQuestion(
+      {
+        type: "confirm",
+        name: "isVenv",
+        message:
+          "Would you like to create Virtual Environment for dependencies?",
+      },
+      { default: true }
+    );
 
     if (isVenv) {
       try {
         console.log("Creating virtual environment...".blue);
         execSync("python -m venv venv");
       } catch (error) {
-        new ErrorHandler(
-          error,
-          `There was an error creating the Python Virtual Environment`
-        ).handleError();
+        throw new Error(
+          `There was an error creating the Python Virtual Environment!\n${error}`
+        );
       }
     }
 
-    const { isAdditionalLibraries } = await inquirer.prompt({
-      type: "confirm",
-      name: "isAdditionalLibraries",
-      message: "Is your app use additional libraries?",
-    });
+    const { isAdditionalLibraries } = await UserInterations.prepareQuestion(
+      {
+        type: "confirm",
+        name: "isAdditionalLibraries",
+        message: "Are you using any of additional dependencies?",
+      },
+      { default: false }
+    );
 
-    if (isAdditionalLibraries) {
-      additionalLibraries("Python");
-    }
+    if (isAdditionalLibraries)
+      await DependencyInstaller.dependencyHandler("Python");
 
-    await projectSummary(projectInfos, projectType);
+    projectSummary(projectInfos, projectType);
   } catch (error) {
-    new ErrorHandler(
-      error,
-      `There was an error creating the Python project`
-    ).handleError();
+    throw new Error(`There was an error creating the Python project\n${error}`);
   }
 }

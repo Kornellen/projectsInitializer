@@ -254,7 +254,7 @@ All of process like creation of `virtual environment` for `Python`, initializati
 
 ## Planned Features
 
-- [ ] Support for C++ language projects
+- [x] Support for C++ language projects
 - [ ] Support for PHP language projects
 
 ## License

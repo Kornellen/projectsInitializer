@@ -1,24 +1,20 @@
-import { createDir, createFile } from "../../helpers/createDirsFiles";
-import projectSummary from "../../helpers/creatingSummary";
-import ErrorHandler from "../../helpers/ErrorHandler";
+import { FileHelper } from "../../helpers/FileHelper";
+import projectSummary from "../../helpers/ProjectSummary";
 
-export default async function Pwsh(
-  projectType: "Plain",
-  projectInfos: { projectName: string; projectPath: string }
+export default function Pwsh(
+  projectType: projectAppType,
+  projectInfos: projectDetailsType
 ) {
   try {
     console.log(`Initialization of PowerShell project...`.blue);
-    projectInfos.projectPath = createDir(projectInfos.projectPath);
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
 
-    createFile(
+    FileHelper.createFile(
       `${projectInfos.projectPath}/script.ps1`,
       "# PowerShell script code goes here"
     );
-    await projectSummary(projectInfos, projectType);
+    projectSummary(projectInfos, projectType);
   } catch (error) {
-    new ErrorHandler(
-      error,
-      `There was an error creating the PowerShell project`
-    ).handleError();
+    throw new Error(`There was an error creating PowerShell project\n${error}`);
   }
 }

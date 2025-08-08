@@ -1,23 +1,24 @@
-import { createDir, createFile } from "../../helpers/createDirsFiles";
-import projectSummary from "../../helpers/creatingSummary";
-import ErrorHandler from "../../helpers/ErrorHandler";
+import { FileHelper } from "../../helpers/FileHelper";
+import projectSummary from "../../helpers/ProjectSummary";
 
-export default async function SQL(
-  projectType: "Plain",
-  projectInfos: { projectName: string; projectPath: string }
+export default function SQL(
+  projectType: projectAppType,
+  projectInfos: projectDetailsType
 ) {
   try {
     console.log(`Initialization of SQL project...`.blue);
-    projectInfos.projectPath = createDir(projectInfos.projectPath);
+
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+
     process.chdir(projectInfos.projectPath);
 
-    createFile(`database.db`, "-- SQL code goes here");
+    FileHelper.createFile(
+      `${projectInfos.projectName}.db`,
+      "-- SQL code goes here"
+    );
 
-    await projectSummary(projectInfos, projectType);
+    projectSummary(projectInfos, projectType);
   } catch (error) {
-    new ErrorHandler(
-      error,
-      `There was an error creating the PowerShell project`
-    ).handleError();
+    throw new Error(`There was an error creating the SQL project\n${error}`);
   }
 }
