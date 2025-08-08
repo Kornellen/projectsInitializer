@@ -19,7 +19,7 @@ export default async function Python(
         type: "confirm",
         name: "isVenv",
         message:
-          "Would you like to create Virtual Environment for dependencies?",
+          "Would you like to create Virttual Environment for dependencies?",
       },
       { default: true }
     );

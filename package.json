@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^22.17.1",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {
@@ -27,5 +28,8 @@
     "inquirer": "^12.3.0",
     "table": "^6.9.0"
   },
-  "description": "Simple CLI Tool for project initialization automatization"
+  "description": "Simple CLI Tool for project initialization automatization",
+  "files": [
+    "dist"
+  ]
 }

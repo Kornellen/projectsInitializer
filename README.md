@@ -2,12 +2,22 @@
 
 ## Overview
 
-This project is a simple, multi-language CLI project management tool that allows users to quickly initialize new projects. Inspired by Vite, this tool supports various programming languages and frameworks, providing a streamlined way to kickstart development.
+<p align='center'>
+<div align='center'>
+<img src='https://badgen.net/npm/v/projectsinitializer'/>
+<a href='LICENSE.md'><img src='https://badgen.net/npm/license/projectsinitializer'/></a>
+</div>
+<div align='center'>
+<img src='https://badgen.net/npm/dw/projectsinitializer?color=blue'/>
+</div>
+</p>
+
+This project is a simple, **multi-language CLI** project management tool that allows users to quickly initialize new projects. Inspired by Vite, this tool supports various programming languages and frameworks, providing a streamlined way to kickstart development.
 
 # Requirements
 
-- node.js >= 20.0.0
-- npm >= 8.0.0
+- **Node.js** >= **20.0.0**
+- **npm** >= **8.0.0**
 
 ## For Developers
 
@@ -21,6 +31,8 @@ This project is a simple, multi-language CLI project management tool that allows
 - `package.json`: Project dependencies and scripts
 
 - `tsconfig.json`: TypeScript compiler options for this project
+
+- `tsup.config.ts`: Contains configuration for the TypeScript compiler
 
 ### `src/` Directory
 
@@ -80,6 +92,8 @@ Contains all the types used in the application
 
 ## Installation
 
+## For Developers
+
 1. Clone the repository:
 
 ```bash
@@ -96,7 +110,7 @@ Contains all the types used in the application
 3. Build the application
 
 ```bash
-    tsc
+    npm run build
 ```
 
 4. Run the application without linking (optional)
@@ -117,31 +131,29 @@ Contains all the types used in the application
     npx projectsinitializer
 ```
 
-## For Release Users
+## For Users
 
 ### Installation
 
-1. Install the CLI tool globally:
+1. Download the latest version:
 
 ```bash
-    npm install -g github:Kornellen/projectsInitializer
+    npm install -g projectsinitializer@latest
 ```
 
 2. Run the CLI tool:
 
 ```bash
-    npx projectsinitializer
-```
-
-Or
-
-```bash
     projectsinitializer
+
+    # or
+
+    npx projectsinitializer
 ```
 
 ## Example Usage
 
-### For Developers
+### Developer Usage
 
 ### Usage without linking
 
@@ -171,7 +183,7 @@ After linking the application, you can use the CLI tool to initialize a new proj
     npx projectsinitializer
 ```
 
-### For All Users
+### Users Experience
 
 This will prompt you to select programming language
 
@@ -208,7 +220,7 @@ Project Path can be absolute path or relative path. In example case it will be i
 In Python projects, you will be asked about creating a virtual environment. Default Option is `Yes`
 
 ```bash
-    ? Is your app use virual environment for packages? (Y/n)
+    ? Is your app use virtual environment for packages? (Y/n)
 ```
 
 In JavaScript or TypeScript you will be asked about application type. If chosen `Plain` you can select beteewn `Console App` with Node.js and `Plain JS` with HTML and CSS - This Option is only aviable for JavaScript.
