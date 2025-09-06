@@ -1,6 +1,7 @@
 import { UserInterations } from "../../../../../helpers/UserInteractions";
 import { FileHelper } from "../../../../../helpers/FileHelper";
 import { DependencyInstaller } from "../../../../../helpers/DependencyInstaller";
+import { execSync } from "child_process";
 
 export class ServerApp {
   private static DEFAULT_SERVER_DEPS = [
@@ -21,13 +22,24 @@ export class ServerApp {
 
   public static async main(language: "JavaScript" | "TypeScript") {
     try {
-      if (language === "TypeScript") DependencyInstaller.setUpTypeScript();
+      execSync("npm init -y");
 
-      DependencyInstaller.defaultDepInstaller(
+      if (language === "TypeScript") {
+        console.log("Initializing TypeScript...");
+        await DependencyInstaller.setUpTypeScript();
+      }
+
+      const isError = await DependencyInstaller.defaultDepInstaller(
         "JavaScript",
         this.DEFAULT_SERVER_DEPS,
         false
       );
+
+      if (isError) {
+        throw new Error(
+          "There was an error installing default server libraries"
+        );
+      }
 
       const { isAdditionalDependencies } =
         await UserInterations.prepareQuestion({
@@ -39,12 +51,14 @@ export class ServerApp {
         });
 
       if (isAdditionalDependencies)
-        DependencyInstaller.dependencyHandler(language);
+        await DependencyInstaller.dependencyHandler(language);
 
       this.DEFAULT_APP_STRUCTURE.forEach((directory) =>
         FileHelper.createDir(directory)
       );
     } catch (error) {
+      console.log(error);
+
       throw new Error("There was an error creating new Server App");
     }
   }

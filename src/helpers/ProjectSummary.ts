@@ -7,10 +7,11 @@ export default function projectSummary(
   const dateOfCreation = new Date().toLocaleTimeString();
 
   const summaryData = [
-    ["Location", "Time of creation", "Type", "Name"],
+    ["Location", "Time of creation", "Language", "Type", "Name"],
     [
       projectInfos.projectPath,
       dateOfCreation,
+      projectInfos.language,
       projectType,
       projectInfos.projectName,
     ],

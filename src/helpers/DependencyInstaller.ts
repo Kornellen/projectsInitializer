@@ -38,6 +38,10 @@ export class DependencyInstaller {
       { default: false }
     );
 
+    if (language === "TypeScript") {
+      await this.setUpTypeScript();
+    }
+
     this.dependencyInstaller(language, dependenciesToInstall, isDevMode);
   }
 
@@ -49,15 +53,6 @@ export class DependencyInstaller {
     try {
       const installationVariant = isDevMode ? "Dev" : "Classic";
       let command: string = "";
-      const dependencies = new Set(dependenciesToInstall.split(" "));
-
-      if (language === "TypeScript" && isDevMode) {
-        this.DEFAULT_DEPENDENCIES["TypeScript"].forEach((dep) =>
-          dependencies.add(dep)
-        );
-      }
-
-      dependenciesToInstall = [...dependencies].join(" ");
 
       if (language === "JavaScript" || language === "TypeScript")
         command = this.LANGUAGE_COMMANDS["JavaScript"][installationVariant](
@@ -67,46 +62,49 @@ export class DependencyInstaller {
         command = this.LANGUAGE_COMMANDS["Python"][installationVariant](
           dependenciesToInstall
         );
+      let response = child_process.exec(command);
 
-      const { stderr } = child_process.exec(command);
-
-      if (stderr) console.error(stderr);
+      return response.exitCode;
     } catch (error) {
+      console.log(error);
       throw new Error(`There was an Error installing Dependencies!\n${error}`);
     }
   }
 
-  public static setUpTypeScript() {
+  public static async setUpTypeScript(): Promise<void> {
     try {
-      const command = this.LANGUAGE_COMMANDS["JavaScript"]["Dev"](
+      let command = this.LANGUAGE_COMMANDS["JavaScript"]["Dev"](
         this.DEFAULT_DEPENDENCIES["TypeScript"].join(" ")
       );
+      command += "&& npx tsc --init";
 
-      child_process.exec(command);
+      console.log(command);
 
-      child_process.exec("npx tsc --init");
+      child_process.exec(command, (error) =>
+        error ? console.error(error) : null
+      );
     } catch (error) {
       throw new Error(`There was an error seting up TypeScript\n${error}`);
     }
   }
 
-  public static defaultDepInstaller(
+  public static async defaultDepInstaller(
     lang: "JavaScript" | "Python",
     deps: string[],
     isDev: boolean
-  ) {
-    if (lang === "JavaScript")
-      child_process.exec(
-        this.LANGUAGE_COMMANDS["JavaScript"][isDev ? "Dev" : "Classic"](
-          deps.join(" ")
-        )
-      );
+  ): Promise<0 | 1> {
+    console.log("Installing default libraries...");
 
-    if (lang === "Python")
-      child_process.exec(
-        this.LANGUAGE_COMMANDS["Python"][isDev ? "Dev" : "Classic"](
-          deps.join(" ")
-        )
-      );
+    const installer: number | null = await this.dependencyInstaller(
+      lang,
+      deps.join(" "),
+      isDev
+    );
+
+    if (installer) {
+      return 1;
+    }
+
+    return 0;
   }
 }

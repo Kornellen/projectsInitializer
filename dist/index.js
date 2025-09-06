@@ -22,53 +22,537 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
+
+// src/helpers/FileHelper.ts
+var import_fs = __toESM(require("fs"));
+var import_path = __toESM(require("path"));
+var FileHelper = class {
+  static createUniqueDirectory(createPath, counter = 1) {
+    let dir = createPath;
+    let counterValue = counter;
+    if (!import_fs.default.existsSync(dir)) return dir;
+    if (!isNaN(Number(dir[dir.length - 1]))) {
+      dir = dir.replace(dir[dir.length - 1], `${counterValue}`);
+    } else dir += `_${counterValue}`;
+    return this.createUniqueDirectory(dir, counterValue + 1);
+  }
+  static createDir(pathToDir) {
+    try {
+      const dir = this.createUniqueDirectory(pathToDir);
+      import_fs.default.mkdirSync(dir, { recursive: true });
+      return dir;
+    } catch (error) {
+      throw new Error(
+        `There was an error creating project directory
+${error}`
+      );
+    }
+  }
+  static createFile(fileName, fileContent = "") {
+    try {
+      import_fs.default.writeFileSync(fileName, fileContent, { encoding: "utf-8" });
+    } catch (error) {
+      throw new Error(`There was an error creating file
+${error}`);
+    }
+  }
+  static async cleanUpInCaseOfError(projectPath, error) {
+    try {
+      console.log(String(error).red.bold);
+      process.chdir("../");
+      await import_fs.default.promises.rm(projectPath, { recursive: true, force: true });
+      console.error(
+        `[Error]: ${error}
+Removing directory at ${import_path.default.resolve(projectPath)}`
+      );
+    } catch (error2) {
+      console.error(error2);
+    }
+  }
 };
 
-// src/index.ts
-var import_inquirer8 = __toESM(require("inquirer"));
+// src/helpers/ProjectSummary.ts
+var import_table = require("table");
+function projectSummary(projectInfos, projectType) {
+  const dateOfCreation = (/* @__PURE__ */ new Date()).toLocaleTimeString();
+  const summaryData = [
+    ["Location", "Time of creation", "Language", "Type", "Name"],
+    [
+      projectInfos.projectPath,
+      dateOfCreation,
+      projectInfos.language,
+      projectType,
+      projectInfos.projectName
+    ]
+  ];
+  console.log((0, import_table.table)(summaryData));
+  console.log("Good Luck!");
+}
 
 // src/modules/languages/Cpp.ts
 function Cpp(projectType, projectInfos) {
+  try {
+    console.log(`Initialization of C++ project...`.blue);
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+    FileHelper.createFile(
+      `${projectInfos.projectPath}/main.cpp`,
+      `// C++ script code goes here
+#include <iostream>`
+    );
+    projectSummary(projectInfos, projectType);
+  } catch (error) {
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error ? error.message : new Error(
+        `There was an error creating ${projectInfos.language} project`
+      )
+    );
+  }
 }
 
-// src/modules/languages/JavaScript.ts
-var import_inquirer4 = __toESM(require("inquirer"));
+// src/modules/languages/Pwsh.ts
+function Pwsh(projectType, projectInfos) {
+  try {
+    console.log(`Initialization of PowerShell project...`.blue);
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+    FileHelper.createFile(
+      `${projectInfos.projectPath}/script.ps1`,
+      "# PowerShell script code goes here"
+    );
+    projectSummary(projectInfos, projectType);
+  } catch (error) {
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error ? error.message : new Error(
+        `There was an error creating ${projectInfos.language} project`
+      )
+    );
+  }
+}
 
-// src/modules/AppTypes/server/ConsoleApp.ts
-var import_child_process3 = require("child_process");
-var import_inquirer2 = __toESM(require("inquirer"));
-
-// src/helpers/additionalLibraries.ts
-var import_inquirer = __toESM(require("inquirer"));
-
-// src/helpers/packageInstallers.ts
+// src/modules/languages/Python.ts
 var import_child_process2 = require("child_process");
 
-// src/helpers/ErrorHandler.ts
-var import_child_process = require("child_process");
+// src/helpers/UserInteractions.ts
+var import_inquirer = __toESM(require("inquirer"));
+var UserInterations = class {
+  static async prepareQuestion({ type, name, message, choices }, other) {
+    if (choices) {
+      return await import_inquirer.default.prompt([
+        {
+          type,
+          name,
+          message,
+          choices,
+          ...other
+        }
+      ]);
+    }
+    return await import_inquirer.default.prompt([
+      { type, name, message, ...other }
+    ]);
+  }
+};
+
+// src/helpers/DependencyInstaller.ts
 var import_os = __toESM(require("os"));
-var import_fs = __toESM(require("fs"));
-var import_path = __toESM(require("path"));
+var import_child_process = __toESM(require("child_process"));
+var DependencyInstaller = class {
+  static LANGUAGE_COMMANDS = {
+    JavaScript: {
+      Dev: (dependencies) => `npm i -D ${dependencies}`,
+      Classic: (dependencies) => `npm i ${dependencies}`
+    },
+    Python: {
+      Dev: (dependencies) => {
+        return import_os.default.platform() === "win32" ? `venv\\Scripts\\Activate.ps1 && pip install ${dependencies}` : `venv\\bin\\activate && venv\\bin\\pip install ${dependencies}`;
+      },
+      Classic: (dependencies) => `pip install ${dependencies}`
+    }
+  };
+  static DEFAULT_DEPENDENCIES = {
+    JavaScript: [],
+    TypeScript: ["typescript", "ts-node", "@types/node"],
+    Python: []
+  };
+  static async dependencyHandler(language) {
+    const { dependenciesToInstall } = await UserInterations.prepareQuestion({
+      type: "input",
+      name: "dependenciesToInstall",
+      message: "Enter additional dependencies to install"
+    });
+    const { isDevMode } = await UserInterations.prepareQuestion(
+      {
+        type: "confirm",
+        name: "isDevMode",
+        message: "Installing as Dev/Virutal Dependencies?"
+      },
+      { default: false }
+    );
+    if (language === "TypeScript") {
+      await this.setUpTypeScript();
+    }
+    this.dependencyInstaller(language, dependenciesToInstall, isDevMode);
+  }
+  static async dependencyInstaller(language, dependenciesToInstall, isDevMode) {
+    try {
+      const installationVariant = isDevMode ? "Dev" : "Classic";
+      let command = "";
+      if (language === "JavaScript" || language === "TypeScript")
+        command = this.LANGUAGE_COMMANDS["JavaScript"][installationVariant](
+          dependenciesToInstall
+        );
+      if (language === "Python")
+        command = this.LANGUAGE_COMMANDS["Python"][installationVariant](
+          dependenciesToInstall
+        );
+      let response = import_child_process.default.exec(command);
+      return response.exitCode;
+    } catch (error) {
+      console.log(error);
+      throw new Error(`There was an Error installing Dependencies!
+${error}`);
+    }
+  }
+  static async setUpTypeScript() {
+    try {
+      let command = this.LANGUAGE_COMMANDS["JavaScript"]["Dev"](
+        this.DEFAULT_DEPENDENCIES["TypeScript"].join(" ")
+      );
+      command += "&& npx tsc --init";
+      console.log(command);
+      import_child_process.default.exec(
+        command,
+        (error) => error ? console.error(error) : null
+      );
+    } catch (error) {
+      throw new Error(`There was an error seting up TypeScript
+${error}`);
+    }
+  }
+  static async defaultDepInstaller(lang, deps, isDev) {
+    console.log("Installing default libraries...");
+    const installer = await this.dependencyInstaller(
+      lang,
+      deps.join(" "),
+      isDev
+    );
+    if (installer) {
+      return 1;
+    }
+    return 0;
+  }
+};
+
+// src/modules/languages/Python.ts
+async function Python(projectType, projectInfos) {
+  try {
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+    process.chdir(projectInfos.projectPath);
+    FileHelper.createFile(`main.py`, "# Python code goes here");
+    const { isVenv } = await UserInterations.prepareQuestion(
+      {
+        type: "confirm",
+        name: "isVenv",
+        message: "Would you like to create Virttual Environment for dependencies?"
+      },
+      { default: true }
+    );
+    if (isVenv) {
+      try {
+        console.log("Creating virtual environment...".blue);
+        (0, import_child_process2.execSync)("python -m venv venv");
+      } catch (error) {
+        throw new Error(
+          `There was an error creating the Python Virtual Environment!
+${error}`
+        );
+      }
+    }
+    const { isAdditionalLibraries } = await UserInterations.prepareQuestion(
+      {
+        type: "confirm",
+        name: "isAdditionalLibraries",
+        message: "Would you like to install any dependencies?"
+      },
+      { default: false }
+    );
+    if (isAdditionalLibraries)
+      await DependencyInstaller.dependencyHandler("Python");
+    projectSummary(projectInfos, projectType);
+  } catch (error) {
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error ? error.message : new Error(
+        `There was an error creating ${projectInfos.language} project`
+      )
+    );
+  }
+}
+
+// src/modules/languages/SQL.ts
+function SQL(projectType, projectInfos) {
+  try {
+    console.log(`Initialization of SQL project...`.blue);
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+    process.chdir(projectInfos.projectPath);
+    FileHelper.createFile(
+      `${projectInfos.projectName}.sql`,
+      "-- SQL code goes here"
+    );
+    projectSummary(projectInfos, projectType);
+  } catch (error) {
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error ? error.message : new Error(
+        `There was an error creating ${projectInfos.language} project`
+      )
+    );
+  }
+}
+
+// src/modules/languages/JavaScript-TypeScript/AppTypes/client/FrontendApp.ts
+var import_child_process3 = require("child_process");
+async function selectFrontendFramework(framework, projectDetails, language) {
+  const FRAMEWORK_INIT_COMMANDS = {
+    React: {
+      TypeScript: `npm create vite@latest ${projectDetails.projectName}\\. --template react-ts`,
+      JavaScript: `npm create vite@latest ${projectDetails.projectName}\\. --template react`
+    },
+    Next: {
+      TypeScript: `npx create-next-app@latest ${projectDetails.projectName} --ts --tailwind --eslint --use-npm --src-dir --no-turbopack --app`,
+      JavaScript: `npx create-next-app@latest ${projectDetails.projectName} --js --tailwind --eslint --use-npm --src-dir --no-turbopack --app`
+    }
+  };
+  let command = "";
+  try {
+    switch (framework) {
+      case "Next.js":
+        console.log(`Initialization of Next.js + ${language} project...`.blue);
+        command = FRAMEWORK_INIT_COMMANDS["Next"][language];
+        break;
+      case "React + Vite":
+        console.log(
+          `Initialization of React + Vite + ${language} project...`.blue
+        );
+        command = FRAMEWORK_INIT_COMMANDS["React"][language];
+        break;
+    }
+    const { stderr } = await (0, import_child_process3.exec)(command);
+    if (stderr) console.error(stderr);
+  } catch (error) {
+    throw new Error(
+      `There was an error creating ${framework} project
+${error}`
+    );
+  }
+}
+
+// src/modules/languages/JavaScript-TypeScript/AppTypes/client/PlainWithHTML.ts
+function PlainWithHTMl() {
+  try {
+    const files = [
+      { file: "index.html", content: `<script src="./app.js"></script>` },
+      { file: "style.css", content: "/*CSS Stylesheet*/" },
+      { file: "app.js", content: "// JavaScript code" }
+    ];
+    files.forEach((file) => {
+      FileHelper.createFile(file.file, file.content);
+    });
+  } catch (error) {
+    throw new Error(`There was an error creating vanilla JavaScript Project`);
+  }
+}
+
+// src/modules/languages/JavaScript-TypeScript/AppTypes/server/ConsoleApp.ts
+var import_child_process4 = require("child_process");
+async function ConsoleApp(language) {
+  try {
+    console.log("Initialization of Console App...".blue);
+    (0, import_child_process4.execSync)("npm init -y");
+    if (language === "TypeScript") {
+      console.log("Initializing TypeScript...");
+      await DependencyInstaller.dependencyHandler("TypeScript");
+    }
+    const { isAdditionalDependencies } = await UserInterations.prepareQuestion({
+      type: "confirm",
+      name: "isAdditionalDependencies",
+      message: "Do you want to install other dependencies?"
+    });
+    if (isAdditionalDependencies)
+      DependencyInstaller.dependencyHandler(language);
+    FileHelper.createDir("./src");
+  } catch (error) {
+    throw new Error(
+      `There was an error creating new Console App with ${language}`
+    );
+  }
+}
+
+// src/modules/languages/JavaScript-TypeScript/AppTypes/server/ServerApp.ts
+var import_child_process5 = require("child_process");
+var ServerApp = class {
+  static DEFAULT_SERVER_DEPS = [
+    "express",
+    "express-validator",
+    "cors",
+    "dotenv",
+    "http"
+  ];
+  static DEFAULT_APP_STRUCTURE = [
+    "src",
+    "src/config",
+    "src/routes",
+    "src/controllers",
+    "src/middlewares",
+    "src/helpers"
+  ];
+  static async main(language) {
+    try {
+      (0, import_child_process5.execSync)("npm init -y");
+      if (language === "TypeScript") {
+        console.log("Initializing TypeScript...");
+        await DependencyInstaller.setUpTypeScript();
+      }
+      const isError = await DependencyInstaller.defaultDepInstaller(
+        "JavaScript",
+        this.DEFAULT_SERVER_DEPS,
+        false
+      );
+      if (isError) {
+        throw new Error(
+          "There was an error installing default server libraries"
+        );
+      }
+      const { isAdditionalDependencies } = await UserInterations.prepareQuestion({
+        type: "confirm",
+        name: "isAdditionalLibraries",
+        message: `Is Backend App use other libraries? (Currently installed:
+${this.DEFAULT_SERVER_DEPS.join(
+          ",\n"
+        )})`
+      });
+      if (isAdditionalDependencies)
+        await DependencyInstaller.dependencyHandler(language);
+      this.DEFAULT_APP_STRUCTURE.forEach(
+        (directory) => FileHelper.createDir(directory)
+      );
+    } catch (error) {
+      console.log(error);
+      throw new Error("There was an error creating new Server App");
+    }
+  }
+};
+
+// src/modules/languages/JavaScript-TypeScript/TJS.ts
+async function selectAppType(app, language, projectInfos) {
+  console.log(language);
+  switch (app) {
+    case "Frontend":
+      const { FrontedFramework } = await UserInterations.prepareQuestion({
+        type: "list",
+        name: "FrontendFramework",
+        message: "Choose Framework for Frontend",
+        choices: ["React + Vite", "Next.js"]
+      });
+      await selectFrontendFramework(FrontedFramework, projectInfos, language);
+      break;
+    case "Backend":
+      await ServerApp.main(language);
+      break;
+    case "Console":
+      await ConsoleApp(language);
+      break;
+    case "Vanilla":
+      if (language === "TypeScript")
+        throw new Error("TypeScript is unsupported with this one");
+      await PlainWithHTMl();
+      break;
+  }
+}
+async function TJS(projectType, projectInfos, language) {
+  try {
+    projectInfos.projectPath = FileHelper.createDir(projectInfos.projectPath);
+    process.chdir(projectInfos.projectPath);
+    const { app } = await UserInterations.prepareQuestion({
+      type: "list",
+      name: "app",
+      message: "Choose App Type",
+      choices: ["Frontend", "Backend", "Console", "Vanilla"]
+    });
+    await selectAppType(app, language, projectInfos);
+    projectSummary(projectInfos, projectType);
+  } catch (error) {
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error ? error.message : new Error(
+        `There was an error creating ${projectInfos.language} project`
+      )
+    );
+  }
+}
+
+// src/helpers/ProjectDetails.ts
+var ProjectDetails = class {
+  static projectDetails;
+  static async SetUpProjectDetails(language) {
+    const { projectName } = await UserInterations.prepareQuestion(
+      {
+        type: "input",
+        name: "projectName",
+        message: "Enter your project name"
+      },
+      {
+        default: `my-${language === "C++" ? "cpp" : language.toLocaleLowerCase()}-project`
+      }
+    );
+    let { projectPath } = await UserInterations.prepareQuestion(
+      {
+        type: "input",
+        name: "projectPath",
+        message: "Enter path to your new project (require full path like: C:\\Users\\your_project_name etc.)"
+      },
+      { default: `.\\${projectName}` }
+    );
+    if (!projectPath.includes(projectName)) projectPath += "\\" + projectName;
+    this.projectDetails = {
+      projectName,
+      projectPath,
+      language
+    };
+  }
+};
+
+// src/helpers/selectLanguage.ts
+async function selectLanguage(language, projectType) {
+  const projectInfos = ProjectDetails.projectDetails;
+  switch (language) {
+    case "C++":
+      Cpp(projectType, projectInfos);
+      break;
+    case "TypeScript":
+    case "JavaScript":
+      TJS(projectType, projectInfos, language);
+      break;
+    case "PowerShell":
+      Pwsh(projectType, projectInfos);
+      break;
+    case "Python":
+      Python(projectType, projectInfos);
+      break;
+    case "SQL":
+      SQL(projectType, projectInfos);
+      break;
+  }
+}
+
+// src/index.ts
+var import_colors = __toESM(require("colors"));
+
+// src/helpers/ErrorHandler.ts
 var ErrorHandler = class {
+  error;
+  message;
   constructor(error, message) {
     this.error = error;
     this.message = message;
@@ -83,570 +567,66 @@ var ErrorHandler = class {
       console.error(` [Error Handler - Error Details]: ${this.error}`.yellow);
     }
   }
-  cleanUp(directory) {
-    try {
-      const command = import_os.default.platform() === "win32" ? `rmdir /s /q "${directory}"` : `rm -rf ${directory}`;
-      if (import_fs.default.existsSync(directory)) {
-        console.log(`Cleaning up directory: ${directory}`.yellow);
-        process.chdir(`${import_path.default.dirname(directory)}`);
-        (0, import_child_process.execSync)(command, { stdio: "inherit" });
-      } else {
-        console.warn(`Directory does not exist: ${directory}`.yellow);
-      }
-      console.log(`Cleanup successful.`.green);
-    } catch (cleanupError) {
-      console.error(`Error during cleanup: ${cleanupError}`.red);
-    }
-  }
   handleError() {
     this.logError();
-    this.cleanUp(process.cwd());
+    FileHelper.cleanUpInCaseOfError(process.cwd(), this.error);
     console.log("Exiting process...".gray);
     process.exit(1);
   }
   static handleSIGNINT() {
     process.on("SIGINT", () => {
       console.log("Received SIGINT signal. Exiting process...".yellow);
+      FileHelper.cleanUpInCaseOfError(process.cwd(), "Recived SIGINT");
       process.exit(1);
     });
   }
 };
 var ErrorHandler_default = ErrorHandler;
 
-// src/helpers/packageInstallers.ts
-function npmPackageInstaller(saveDev, packageLists) {
-  return __async(this, null, function* () {
-    try {
-      const command = `npm install ${packageLists.join(" ")} ${saveDev ? "--save-dev" : ""}`;
-      (0, import_child_process2.execSync)(command);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error installing the npm package`
-      ).handleError();
-    }
-  });
-}
-function pipPackageInstaller(packageLists) {
-  return __async(this, null, function* () {
-    try {
-      const command = `venv\\Scripts\\activate && pip install ${packageLists.join(
-        " "
-      )}`;
-      (0, import_child_process2.execSync)(command);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error installing the pip package`
-      ).handleError();
-    }
-  });
-}
-
-// src/helpers/additionalLibraries.ts
-function additionalLibraries(language) {
-  return __async(this, null, function* () {
-    const { additionalLibraries: additionalLibraries2 } = yield import_inquirer.default.prompt({
-      type: "input",
-      name: "additionalLibraries",
-      message: "Type Additional Libraries to install"
-    });
-    if (language === "Python") {
-      pipPackageInstaller(additionalLibraries2.split(" "));
-    } else if (language === "JavaScript" || language === "TypeScript") {
-      const { saveDev } = yield import_inquirer.default.prompt({
-        type: "confirm",
-        name: "saveDev",
-        message: "Save Developer mode? (default: No)",
-        default: false
-      });
-      npmPackageInstaller(saveDev, additionalLibraries2.split(" "));
-    } else {
-      return;
-    }
-  });
-}
-
-// src/helpers/createDirsFiles.ts
-var import_fs2 = __toESM(require("fs"));
-var uniqueDir = (path3) => {
-  let dir = path3;
-  let counter = 1;
-  while (import_fs2.default.existsSync(dir)) {
-    dir = path3 + `-${counter}`;
-    counter++;
-  }
-  return dir;
-};
-var createDir = (dirName) => {
-  const dir = uniqueDir(dirName);
-  try {
-    import_fs2.default.mkdirSync(dir, { recursive: true });
-    return dir;
-  } catch (error) {
-    new ErrorHandler_default(
-      error,
-      "There was an error creating the directory"
-    ).handleError();
-    throw error;
-  }
-};
-var createFile = (fileName, fileContent = "") => {
-  try {
-    import_fs2.default.writeFileSync(fileName, fileContent, { encoding: "utf8" });
-  } catch (error) {
-    new ErrorHandler_default(
-      error,
-      "There was an error creating the file"
-    ).handleError();
-  }
-};
-
-// src/modules/AppTypes/server/ConsoleApp.ts
-function ConsoleApp(language) {
-  return __async(this, null, function* () {
-    try {
-      console.log("Initialization of Console App...".blue);
-      (0, import_child_process3.execSync)("npm init -y");
-      if (language === "TypeScript") {
-        npmPackageInstaller(true, ["typescript", "ts-node", "@types/node"]);
-        (0, import_child_process3.execSync)("npx tsc --init", { stdio: "inherit" });
-      }
-      const { isAdditionalLibraries } = yield import_inquirer2.default.prompt({
-        type: "confirm",
-        name: "isAdditionalLibraries",
-        message: "Is your app use additional libraries?"
-      });
-      if (isAdditionalLibraries) {
-        additionalLibraries(language);
-      }
-      createDir("./src");
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error creating the console app."
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/AppTypes/server/ServerApp.ts
-var import_child_process4 = require("child_process");
-var import_inquirer3 = __toESM(require("inquirer"));
-function configureHTTPS(dirs, isHTTPS) {
-  if (isHTTPS) {
-    dirs.push("certificates");
-  }
-}
-function setupTypeScript(typeScriptPack) {
-  return __async(this, null, function* () {
-    try {
-      console.log("Setting up TypeScript...".blue);
-      npmPackageInstaller(true, typeScriptPack);
-      (0, import_child_process4.execSync)("tsc --init");
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error setting up TypeScript"
-      ).handleError();
-    }
-  });
-}
-function ServerApp(language) {
-  return __async(this, null, function* () {
-    try {
-      console.log("Initialization of Server App...".blue);
-      (0, import_child_process4.execSync)("npm init -y");
-      const { isHTTPS } = yield import_inquirer3.default.prompt({
-        type: "confirm",
-        name: "isHTTPS",
-        message: "Is Backend APP use HTTPS Protocol?"
-      });
-      const typeScriptPack = [
-        "typescript",
-        "ts-node",
-        "tsc",
-        "@types/node",
-        "@types/express",
-        "@types/cors",
-        "@types/express-validator"
-      ];
-      const dirs = [
-        "src",
-        "src/config",
-        "src/routes",
-        "src/controllers",
-        "src/middlewares",
-        "src/helpers"
-      ];
-      const defautlLib = [
-        "express",
-        "express-validator",
-        "cors",
-        "dotenv",
-        "https",
-        "http"
-      ];
-      if (language === "TypeScript") {
-        yield setupTypeScript(typeScriptPack);
-      }
-      npmPackageInstaller(false, defautlLib);
-      const { isAdditionalLibraries } = yield import_inquirer3.default.prompt({
-        type: "confirm",
-        name: "isAdditionalLibraries",
-        message: `Is Backend App use other libraries? (Currently installed: ${language === "TypeScript" ? defautlLib.concat(typeScriptPack).join(", ") : defautlLib.join(", ")})`
-      });
-      if (isAdditionalLibraries) {
-        additionalLibraries("JavaScript");
-      }
-      configureHTTPS(dirs, isHTTPS);
-      console.log(`Creating app at ${process.cwd()}...`);
-      dirs.forEach((dir) => {
-        createDir(dir);
-      });
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error creating Server App"
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/AppTypes/client/PlainWithHTML.ts
-function PlainWithHTMl() {
-  return __async(this, null, function* () {
-    try {
-      const files = [
-        { file: "index.html", content: `<script src="./app.js"></script>` },
-        { file: "style.css", content: "/*CSS Stylesheet*/" },
-        { file: "app.js", content: "// JavaScript code" }
-      ];
-      files.forEach((file) => {
-        createFile(file.file, file.content);
-      });
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error creating the Plain Js with HTML project"
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/AppTypes/client/FrontendApp.ts
-var import_child_process5 = require("child_process");
-function checkFramework(framework, projectDetails2, language) {
-  return __async(this, null, function* () {
-    try {
-      switch (framework) {
-        case "Next.js":
-          console.log(`Initialization of Next.js + ${language} project...`.blue);
-          const commandNext = language === "JavaScript" ? `npx create-next-app@latest ${projectDetails2.projectName} --js --tailwind --eslint --use-npm --src-dir --no-turbopack --app` : `npx create-next-app@latest ${projectDetails2.projectName} --ts --tailwind --eslint --use-npm --src-dir --no-turbopack --app`;
-          (0, import_child_process5.execSync)(commandNext, {
-            stdio: "inherit"
-          });
-          break;
-        case "React + Vite":
-          console.log(
-            `Initialization of React + Vite + ${language} project...`.blue
-          );
-          const commandVite = language === "JavaScript" ? `npm create vite@latest ${projectDetails2.projectName}\\. -- --template react` : `npm create vite@latest ${projectDetails2.projectName}\\. -- --template react-ts`;
-          (0, import_child_process5.execSync)(commandVite, {
-            stdio: "inherit"
-          });
-          break;
-      }
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error creating ${framework} project`
-      ).handleError();
-    }
-  });
-}
-
-// src/helpers/creatingSummary.ts
-function projectSummary(projectInfos, projectType) {
-  const dateOfCreation = (/* @__PURE__ */ new Date()).toLocaleTimeString();
-  return console.log(
-    `Project created at ${projectInfos.projectPath} | Time: ${dateOfCreation} | Project Type: ${projectType} | Project Name: ${projectInfos.projectName} | Good Luck!`.bgBlue
-  );
-}
-
-// src/modules/languages/JavaScript.ts
-function JavaScript(projectType, projectInfos) {
-  return __async(this, null, function* () {
-    try {
-      projectInfos.projectPath = createDir(projectInfos.projectPath);
-      process.chdir(projectInfos.projectPath);
-      if (projectType === "Framework") {
-        const { app: app2 } = yield import_inquirer4.default.prompt({
-          type: "list",
-          name: "app",
-          message: "Choose App Type",
-          choices: ["Frontend", "Backend"]
-        });
-        switch (app2) {
-          case "Frontend":
-            const { javaScriptFramework } = yield import_inquirer4.default.prompt({
-              type: "list",
-              name: "javaScriptFramework",
-              message: "Choose Framework for Frontend",
-              choices: ["React + Vite", "Next.js"]
-            });
-            yield checkFramework(javaScriptFramework, projectInfos, "JavaScript");
-            break;
-          case "Backend":
-            yield ServerApp("JavaScript");
-            break;
-        }
-      } else {
-        const { app: app2 } = yield import_inquirer4.default.prompt({
-          type: "list",
-          name: "app",
-          message: "Choose App Type",
-          choices: ["Console app", "Plain with HTML"]
-        });
-        switch (app2) {
-          case "Console app":
-            yield ConsoleApp("JavaScript");
-            break;
-          case "Plain with HTML":
-            yield PlainWithHTMl();
-            break;
-        }
-      }
-      yield projectSummary(projectInfos, projectType);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error creating the JavaScript project"
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/languages/Pwsh.ts
-function Pwsh(projectType, projectInfos) {
-  return __async(this, null, function* () {
-    try {
-      console.log(`Initialization of PowerShell project...`.blue);
-      projectInfos.projectPath = createDir(projectInfos.projectPath);
-      createFile(
-        `${projectInfos.projectPath}/script.ps1`,
-        "# PowerShell script code goes here"
-      );
-      yield projectSummary(projectInfos, projectType);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error creating the PowerShell project`
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/languages/Python.ts
-var import_inquirer5 = __toESM(require("inquirer"));
-var import_child_process6 = require("child_process");
-function Python(projectType, projectInfos) {
-  return __async(this, null, function* () {
-    try {
-      projectInfos.projectPath = createDir(projectInfos.projectPath);
-      process.chdir(projectInfos.projectPath);
-      createFile(`main.py`, "# Python code goes here");
-      const { isVenv } = yield import_inquirer5.default.prompt({
-        type: "confirm",
-        name: "isVenv",
-        message: "Is your app use virtual environment for packages?",
-        default: true
-      });
-      if (isVenv) {
-        try {
-          console.log("Creating virtual environment...".blue);
-          (0, import_child_process6.execSync)("python -m venv venv");
-        } catch (error) {
-          new ErrorHandler_default(
-            error,
-            `There was an error creating the Python Virtual Environment`
-          ).handleError();
-        }
-      }
-      const { isAdditionalLibraries } = yield import_inquirer5.default.prompt({
-        type: "confirm",
-        name: "isAdditionalLibraries",
-        message: "Is your app use additional libraries?"
-      });
-      if (isAdditionalLibraries) {
-        additionalLibraries("Python");
-      }
-      yield projectSummary(projectInfos, projectType);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error creating the Python project`
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/languages/SQL.ts
-function SQL(projectType, projectInfos) {
-  return __async(this, null, function* () {
-    try {
-      console.log(`Initialization of SQL project...`.blue);
-      projectInfos.projectPath = createDir(projectInfos.projectPath);
-      process.chdir(projectInfos.projectPath);
-      createFile(`database.db`, "-- SQL code goes here");
-      yield projectSummary(projectInfos, projectType);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        `There was an error creating the PowerShell project`
-      ).handleError();
-    }
-  });
-}
-
-// src/modules/languages/TypeScript.ts
-var import_inquirer6 = __toESM(require("inquirer"));
-function TypeScript(projectType, projectInfos) {
-  return __async(this, null, function* () {
-    try {
-      projectInfos.projectPath = createDir(projectInfos.projectPath);
-      process.chdir(projectInfos.projectPath);
-      if (projectType === "Framework") {
-        const { app: app2 } = yield import_inquirer6.default.prompt({
-          type: "list",
-          name: "app",
-          message: "Choose App Type",
-          choices: ["Frontend", "Backend"]
-        });
-        switch (app2) {
-          case "Frontend":
-            const { javaScriptFramework } = yield import_inquirer6.default.prompt({
-              type: "list",
-              name: "javaScriptFramework",
-              message: "Choose Framework for Frontend",
-              choices: ["React + Vite", "Next.js"]
-            });
-            yield checkFramework(javaScriptFramework, projectInfos, "TypeScript");
-            break;
-          case "Backend":
-            yield ServerApp("TypeScript");
-            break;
-        }
-      } else {
-        const { app: app2 } = yield import_inquirer6.default.prompt({
-          type: "list",
-          name: "app",
-          message: "Choose App Type",
-          choices: ["Console app"]
-        });
-        switch (app2) {
-          case "Console app":
-            yield ConsoleApp("TypeScript");
-            break;
-        }
-      }
-      yield projectSummary(projectInfos, projectType);
-    } catch (error) {
-      new ErrorHandler_default(
-        error,
-        "There was an error creating the TypeScript project"
-      ).handleError();
-    }
-  });
-}
-
-// src/helpers/projectDetails.ts
-var import_inquirer7 = __toESM(require("inquirer"));
-var import_path2 = __toESM(require("path"));
-function projectDetails(language) {
-  return __async(this, null, function* () {
-    const { projectName } = yield import_inquirer7.default.prompt([
-      {
-        type: "input",
-        name: "projectName",
-        message: "Type project name",
-        default: `my-${language === "C++" ? "cpp" : language.toLowerCase()}-project`
-      }
-    ]);
-    const { projectPath } = yield import_inquirer7.default.prompt({
-      type: "input",
-      name: "projectPath",
-      message: "Type Project Path",
-      default: `.\\${projectName}`
-    });
-    let finalPath = projectPath;
-    if (!projectPath.includes(projectName)) {
-      finalPath = import_path2.default.isAbsolute(projectPath) ? projectPath + "\\" + projectName : projectPath + "\\" + projectName;
-    }
-    return {
-      projectName,
-      projectPath: finalPath.replace("/", "\\")
-    };
-  });
-}
-
-// src/helpers/checkLanguage.ts
-function checkLanguage(language, projectType) {
-  return __async(this, null, function* () {
-    const projectInfos = yield projectDetails(language);
-    switch (language) {
-      case "C++":
-        projectType = "Plain";
-        Cpp(projectType, projectInfos);
-        break;
-      case "JavaScript":
-        JavaScript(projectType, projectInfos);
-        break;
-      case "PowerShell":
-        projectType = "Plain";
-        Pwsh(projectType, projectInfos);
-        break;
-      case "Python":
-        projectType = "Plain";
-        Python(projectType, projectInfos);
-        break;
-      case "SQL":
-        projectType = "Plain";
-        SQL(projectType, projectInfos);
-        break;
-      case "TypeScript":
-        TypeScript(projectType, projectInfos);
-        break;
-    }
-  });
-}
-
 // src/index.ts
-var import_colors = __toESM(require("colors"));
 import_colors.default.enable();
-ErrorHandler_default.handleSIGNINT();
-function app() {
-  return __async(this, null, function* () {
-    let projectType;
-    const { language } = yield import_inquirer8.default.prompt({
-      type: "list",
-      name: "language",
-      message: "Choose Language for Project",
-      choices: ["Python", "TypeScript", "JavaScript", "C++", "PowerShell", "SQL"]
-    });
-    let answeredType;
-    if (language !== "SQL" && language !== "PowerShell" && language !== "C++" && language !== "Python") {
-      answeredType = yield import_inquirer8.default.prompt({
+var App = class {
+  static LANGUAGES_WITHOUT_FRAMEWORK_SUPPORT = [
+    "SQL",
+    "PowerShell",
+    "C++",
+    "Python"
+  ];
+  static projectAppType = "Plain";
+  static async main() {
+    try {
+      ErrorHandler_default.handleSIGNINT();
+      const { language } = await UserInterations.prepareQuestion({
         type: "list",
-        name: "projectType",
-        message: "Choose Project Type",
-        choices: ["Plain", "Framework"]
+        name: "language",
+        message: "Choose Language for Project",
+        choices: [
+          "Python",
+          "TypeScript",
+          "JavaScript",
+          "C++",
+          "PowerShell",
+          "SQL"
+        ]
       });
+      if (this.isSupportedLanguageFramework(language)) {
+        const { projectAppType } = await UserInterations.prepareQuestion({
+          type: "list",
+          name: "projectAppType",
+          message: "Choose Project App type",
+          choices: ["Plain", "Framework"]
+        });
+        this.projectAppType = projectAppType;
+      }
+      await ProjectDetails.SetUpProjectDetails(language);
+      selectLanguage(language, this.projectAppType);
+    } catch (error) {
+      throw new Error("There was an error");
     }
-    projectType = (answeredType == null ? void 0 : answeredType.projectType) || "Plain";
-    console.log(`Project Type: ${projectType}`);
-    checkLanguage(language, projectType);
-  });
-}
-app();
+  }
+  static isSupportedLanguageFramework(language) {
+    return !this.LANGUAGES_WITHOUT_FRAMEWORK_SUPPORT.includes(language);
+  }
+};
+App.main();
 //# sourceMappingURL=index.js.map

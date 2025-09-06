@@ -10,15 +10,8 @@ export default async function ConsoleApp(
     execSync("npm init -y");
 
     if (language === "TypeScript") {
-      // console.log(
-      //   "Default TypeScript dependencies are installed automaticaly !if you use dev mode! You don't have to mention them later! ".bgRed.bold()
-      // );
-
-      // DependencyInstaller.dependencyHandler("TypeScript");
-      // execSync("npx tsc --init", { stdio: "inherit" });
       console.log("Initializing TypeScript...");
-
-      DependencyInstaller.setUpTypeScript();
+      await DependencyInstaller.dependencyHandler("TypeScript");
     }
 
     const { isAdditionalDependencies } = await UserInterations.prepareQuestion({

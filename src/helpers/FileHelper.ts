@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 
 export class FileHelper {
   private static createUniqueDirectory(
@@ -35,6 +36,22 @@ export class FileHelper {
       fs.writeFileSync(fileName, fileContent, { encoding: "utf-8" });
     } catch (error) {
       throw new Error(`There was an error creating file\n${error}`);
+    }
+  }
+
+  public static async cleanUpInCaseOfError(projectPath: string, error: any) {
+    try {
+      console.log(String(error).red.bold);
+
+      process.chdir("../");
+
+      await fs.promises.rm(projectPath, { recursive: true, force: true });
+
+      console.error(
+        `[Error]: ${error}\nRemoving directory at ${path.resolve(projectPath)}`
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 }

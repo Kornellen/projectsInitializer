@@ -15,6 +15,13 @@ export default function Pwsh(
     );
     projectSummary(projectInfos, projectType);
   } catch (error) {
-    throw new Error(`There was an error creating PowerShell project\n${error}`);
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error
+        ? error.message
+        : new Error(
+            `There was an error creating ${projectInfos.language} project`
+          )
+    );
   }
 }

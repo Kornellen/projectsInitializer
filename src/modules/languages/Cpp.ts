@@ -12,11 +12,18 @@ export default function Cpp(
     FileHelper.createFile(
       `${projectInfos.projectPath}/main.cpp`,
       `// C++ script code goes here
-      #include <iostream>`
+#include <iostream>`
     );
 
     projectSummary(projectInfos, projectType);
   } catch (error) {
-    throw new Error(`There was an error creating C++ project\n${error}`);
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error
+        ? error.message
+        : new Error(
+            `There was an error creating ${projectInfos.language} project`
+          )
+    );
   }
 }

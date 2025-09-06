@@ -13,12 +13,19 @@ export default function SQL(
     process.chdir(projectInfos.projectPath);
 
     FileHelper.createFile(
-      `${projectInfos.projectName}.db`,
+      `${projectInfos.projectName}.sql`,
       "-- SQL code goes here"
     );
 
     projectSummary(projectInfos, projectType);
   } catch (error) {
-    throw new Error(`There was an error creating the SQL project\n${error}`);
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error
+        ? error.message
+        : new Error(
+            `There was an error creating ${projectInfos.language} project`
+          )
+    );
   }
 }

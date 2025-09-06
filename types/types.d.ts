@@ -7,17 +7,14 @@ declare global {
     | "PowerShell"
     | "SQL";
 
-  type javaScriptAppType =
-    | "Frontend"
-    | "Backend"
-    | "Console app"
-    | "Plain with HTML";
+  type javaScriptAppType = "Frontend" | "Backend" | "Console" | "Vanilla";
 
   type projectAppType = "Plain" | "Framework";
 
   type projectDetailsType = {
     projectName: string;
     projectPath: string;
+    language: languageType;
   };
 }
 

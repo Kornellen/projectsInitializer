@@ -1,13 +1,13 @@
 {
   "name": "projectsinitializer",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "main": "dist/index.js",
   "bin": {
     "projectsinitializer": "dist/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "tsup",
     "dev": "ts-node --files src/index.ts"
   },
   "keywords": [
@@ -25,6 +25,11 @@
   },
   "dependencies": {
     "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "http": "^0.0.1-security",
     "inquirer": "^12.3.0",
     "table": "^6.9.0"
   },

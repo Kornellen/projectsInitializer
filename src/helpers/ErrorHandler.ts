@@ -1,8 +1,4 @@
-import { execSync } from "child_process";
-import os from "os";
-import fs from "fs";
-import path from "path";
-
+import { FileHelper } from "./FileHelper";
 class ErrorHandler {
   private error: unknown;
   private message: string;
@@ -23,28 +19,9 @@ class ErrorHandler {
     }
   }
 
-  private cleanUp(directory: string): void {
-    try {
-      const command =
-        os.platform() === "win32"
-          ? `rmdir /s /q "${directory}"`
-          : `rm -rf ${directory}`;
-      if (fs.existsSync(directory)) {
-        console.log(`Cleaning up directory: ${directory}`.yellow);
-        process.chdir(`${path.dirname(directory)}`);
-        execSync(command, { stdio: "inherit" });
-      } else {
-        console.warn(`Directory does not exist: ${directory}`.yellow);
-      }
-      console.log(`Cleanup successful.`.green);
-    } catch (cleanupError) {
-      console.error(`Error during cleanup: ${cleanupError}`.red);
-    }
-  }
-
   public handleError(): void {
     this.logError();
-    this.cleanUp(process.cwd());
+    FileHelper.cleanUpInCaseOfError(process.cwd(), this.error);
     console.log("Exiting process...".gray);
     process.exit(1);
   }
@@ -52,6 +29,7 @@ class ErrorHandler {
   public static handleSIGNINT() {
     process.on("SIGINT", () => {
       console.log("Received SIGINT signal. Exiting process...".yellow);
+      FileHelper.cleanUpInCaseOfError(process.cwd(), "Recived SIGINT");
       process.exit(1);
     });
   }

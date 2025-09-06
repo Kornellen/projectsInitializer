@@ -4,14 +4,15 @@ export default async function selectLanguage(
   language: languageType,
   projectType: projectAppType
 ) {
-  const projectInfos = await ProjectDetails.projectDetails;
+  const projectInfos = ProjectDetails.projectDetails;
 
   switch (language) {
     case "C++":
       Cpp(projectType, projectInfos);
       break;
+    case "TypeScript":
     case "JavaScript":
-      TJS(projectType, projectInfos, "JavaScript");
+      TJS(projectType, projectInfos, language);
       break;
     case "PowerShell":
       Pwsh(projectType, projectInfos);
@@ -21,9 +22,6 @@ export default async function selectLanguage(
       break;
     case "SQL":
       SQL(projectType, projectInfos);
-      break;
-    case "TypeScript":
-      TJS(projectType, projectInfos, "TypeScript");
       break;
   }
 }

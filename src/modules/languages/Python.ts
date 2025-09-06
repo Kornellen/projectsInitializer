@@ -39,7 +39,7 @@ export default async function Python(
       {
         type: "confirm",
         name: "isAdditionalLibraries",
-        message: "Are you using any of additional dependencies?",
+        message: "Would you like to install any dependencies?",
       },
       { default: false }
     );
@@ -49,6 +49,13 @@ export default async function Python(
 
     projectSummary(projectInfos, projectType);
   } catch (error) {
-    throw new Error(`There was an error creating the Python project\n${error}`);
+    FileHelper.cleanUpInCaseOfError(
+      projectInfos.projectPath,
+      error instanceof Error
+        ? error.message
+        : new Error(
+            `There was an error creating ${projectInfos.language} project`
+          )
+    );
   }
 }

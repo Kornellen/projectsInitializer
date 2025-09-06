@@ -5,6 +5,7 @@ import colors from "colors";
 import ErrorHandler from "./helpers/ErrorHandler";
 import { UserInterations } from "./helpers/UserInteractions";
 import { ProjectDetails } from "./helpers/ProjectDetails";
+import { FileHelper } from "./helpers/FileHelper";
 
 colors.enable();
 

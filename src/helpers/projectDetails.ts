@@ -27,11 +27,12 @@ export class ProjectDetails {
       { default: `.\\${projectName}` }
     );
 
-    if (!projectPath.includes(projectName)) projectPath += projectName;
+    if (!projectPath.includes(projectName)) projectPath += "\\" + projectName;
 
     this.projectDetails = {
       projectName: projectName,
       projectPath: projectPath,
+      language: language,
     };
   }
 }
