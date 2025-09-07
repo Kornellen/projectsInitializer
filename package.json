@@ -1,6 +1,6 @@
 {
   "name": "projectsinitializer",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "dist/index.js",
   "bin": {
     "projectsinitializer": "dist/index.js"
