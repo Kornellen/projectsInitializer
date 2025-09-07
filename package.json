@@ -15,6 +15,10 @@
     "automatization",
     "tool"
   ],
+  "readme": "README-npm.md",
+  "repository": {
+    "url": "https://github.com/Kornellen/projectsInitializer"
+  },
   "author": "Kornellen",
   "license": "MIT",
   "devDependencies": {

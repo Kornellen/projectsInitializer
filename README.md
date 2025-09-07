@@ -1,189 +1,132 @@
-# Project Overview
+# ProjectInitializer
+
+<img src='https://badgen.net/badge/icon/typescript?icon=typescript&label'>
+<img src='https://badgen.net/npm/v/projectsinitializer'/>
+<a href='LICENSE.md'><img src='https://badgen.net/npm/license/projectsinitializer'/></a>
+<img src='https://badgen.net/npm/dw/projectsinitializer?color=blue'/>&nbsp;<img src='https://badgen.net/npm/dt/projectsinitializer?color=blue' />&nbsp;<img src='https://badgen.net/github/last-commit/kornellen/projectsInitializer' />
+
+Simple CLI tool for project initialization. Supports languages like **JavaScript, TypeScript, Python and more**
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Requrements](#requirements)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+  - [From GitHub Repository](#from-github-repository)
+  - [Using Package Manager](#using-package-managers)
+- [Example Usage](#example-usage)
+- [Planed Features](#planned-features)
+- [License](#license)
 
 ## Overview
 
-<p align='center'>
-<div align='center'>
-<img src='https://badgen.net/npm/v/projectsinitializer'/>
-<a href='LICENSE.md'><img src='https://badgen.net/npm/license/projectsinitializer'/></a>
-</div>
-<div align='center'>
-<img src='https://badgen.net/npm/dw/projectsinitializer?color=blue'/>
-</div>
-</p>
+Simple, **multi-language CLI** project management tool that allows users to quickly initialize new projects. Inspired by Vite, this tool supports various programming languages and frameworks, providing a streamlined way to kickstart development.
 
-This project is a simple, **multi-language CLI** project management tool that allows users to quickly initialize new projects. Inspired by Vite, this tool supports various programming languages and frameworks, providing a streamlined way to kickstart development.
+## Requirements
 
-# Requirements
+- **Node.js**
+- **npm** or any other **package manager**
 
-- **Node.js** >= **20.0.0**
-- **npm** >= **8.0.0**
+## Project Structure
 
-## For Developers
-
-### Project Structure
-
-### **Root Directory**
-
-- `.gitignore`: Contains files and directories that should be ignored by Git
-- `README.md`: Project Overview and Usage Instructions
-
-- `package.json`: Project dependencies and scripts
-
-- `tsconfig.json`: TypeScript compiler options for this project
-
-- `tsup.config.ts`: Contains configuration for the TypeScript compiler
-
-### `src/` Directory
-
-- src/index.ts: The main entry point of the application
-
-### `src/helpers/` Directory
-
-Contains functions that are common to multiple parts of the application
-
-- `additionalLibraries.ts`: Contains code that allows user to install additional `pip` or `npm` libraries to their project
-
-- `checkLanguage.ts`: Contains code that checks the language of the project and returns the corresponding CLI commands
-
-- `createDirsFiles.ts`: Contains code that creates the necessary directories and files for the project
-
-- `creatingSummary.ts`: Contains code that creates a summary of the project initialization
-
-- `packageInstallers.ts`: Contains code that allows user to install `npm` or `pip` packages to their project
-
-- `projectDetails.ts`: Contains code that allows user to input project details like project name, project path
-
-- `ErrorHandler.ts`: Contains code that handles errors that occur during project initialization
-
-### `src/modules` Directory
-
-Contains all the modules of the application
-
-- `AppType` Subdirectory: Defines types of the application supported by the frameworks
-
-  - `client/FrontendApp.ts`: Manage initialization of Client-side frontend/fullstack applications. There are two types of frontend applications: `React + Vite` and `Next.js`.
-
-  - `client/PlainWithHTML.ts`: Manage initialization of Client-side frontend JavaScript applications with blank HTML file
-
-  - `server/ConsoleApp.ts`: Manage initialization of Server-side Node.js environment `Console Application`
-
-  - `server/ServerApp.ts`: Manage initialization of Server-side Node.js environment `Server Application` with `Express.js`
-
-- `languages` Subdirectory: Definies the programming languages supported by the application
-
-  - `JavaScript.ts`: Manage initialization of JavaScript projects
-
-  - `Python.ts`: Manage initialization of Python projects
-
-  - `TypeScript.ts`: Manage initialization of TypeScript projects
-
-  - `SQL.ts`: Manage initialization of SQL projects
-
-  - `C++.ts`: Manage initialization of C++ projects **(Support Planned)**
-
-  - `Pwsh.ts`: Manage initialization of PowerShell projects
-
-  - `index.ts`: Index file for the `languages` directory
-
-### `src/types` Directory
-
-Contains all the types used in the application
+```
+📁projectsInitializer
+└── 📁src
+    └── 📁helpers                               # Contains helpers objects
+        ├── DependencyInstaller.ts
+        ├── ErrorHandler.ts
+        ├── FileHelper.ts
+        ├── ProjectDetails.ts
+        ├── ProjectSummary.ts
+        ├── selectLanguage.ts
+        ├── UserInteractions.ts
+    └── 📁modules
+        └── 📁languages                         # Contains Language-Orieneted Logic
+            └── 📁JavaScript-TypeScript         # Contains JavaScript/TypeScript-Oriented Logic
+                └── 📁AppTypes
+                    └── 📁client
+                        ├── FrontendApp.ts
+                        ├── PlainWithHTML.ts
+                    └── 📁server
+                        ├── ConsoleApp.ts
+                        ├── ServerApp.ts
+                ├── TJS.ts
+            ├── Cpp.ts
+            ├── Pwsh.ts
+            ├── Python.ts
+            ├── SQL.ts
+       ├── index.ts
+    ├── index.ts
+└── 📁types                                     # Contains custom types
+    ├── types.d.ts
+├── .gitignore                                  # Files excluded from version controll
+├── LICENSE.md                                  # License
+├── package-lock.json                           # npm lock file
+├── package.json
+├── README-npm.md                               # README for npmjs.com
+├── README.md                                   # Full Project Documentation
+├── tsconfig.json
+└── tsup.config.ts                              # TypeScript Compiler Configs
+```
 
 ## Installation
 
-## For Developers
+### From GitHub Repository
 
 1. Clone the repository:
 
-```bash
-    git clone https://github.com/Kornellen/projectsInitializer.git
-```
+   ```bash
+   git clone https://github.com/Kornellen/projectsInitializer.git
+   ```
 
 2. Navigate to the project directory and install dependencies:
 
-```bash
-    cd projectsInitializer
-    npm install
-```
+   ```bash
+   cd projectsInitializer
+   npm install
+   ```
 
 3. Build the application
 
-```bash
-    npm run build
-```
+   ```bash
+   npm run build
+   ```
 
-4. Run the application without linking (optional)
+4. Run the tool
 
-```bash
-    npm run dev
-```
+   - Without linking:
 
-5. Link the application
+   ```bash
+   # For tests
+   npm run dev
+   ```
 
-```bash
-    npm link
-```
+   - With linking:
 
-6. Run the CLI tool
+   ```bash
+   npm link
 
-```bash
-    npx projectsinitializer
-```
+   npx projectsinitializer
+   ```
 
-## For Users
-
-### Installation
-
-1. Download the latest version:
+### Using Package Managers
 
 ```bash
-    npm install -g projectsinitializer@latest
-```
+# Using npm
+npm install -g projectsinitializer
 
-2. Run the CLI tool:
+# Using yarn
 
-```bash
-    projectsinitializer
+yarn global add projectsinitializer
 
-    # or
+# Using pnpm
 
-    npx projectsinitializer
+pnpm add -g projectsinitializer
+
 ```
 
 ## Example Usage
-
-### Developer Usage
-
-### Usage without linking
-
-Just use following command in the main folder of project:
-
-```bash
-    npm run dev # For running the application in development mode
-```
-
-### Usage with linking
-
-At start you need to compile the application with following command:
-
-```bash
-    npm run build # For compiling TypeScript application
-```
-
-After this run:
-
-```bash
-    npm link
-```
-
-After linking the application, you can use the CLI tool to initialize a new project. Here's an example:
-
-```bash
-    npx projectsinitializer
-```
-
-### Users Experience
 
 This will prompt you to select programming language
 
